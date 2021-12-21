@@ -1,0 +1,42 @@
+<launch>
+  	<!-- values passed by command line input -->
+  	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(find ros_robotics)/worlds/big_idea.world"/>
+
+		<arg name="paused" default="true"/>
+		<arg name="use_sim_time" default="true"/>
+		<arg name="gui" default="true"/>
+		<arg name="headless" default="false"/>
+		<arg name="debug" default="false"/>
+		<arg name="verbose" default="true"/>
+	</include>
+
+	<!-- Load the URDF into the ROS Parameter Server -->
+	<param name="robot_description"
+  		command="xacro --inorder $(find ros_robotics)/urdf/big_idea_winch.urdf.xacro" />
+
+
+	<!-- spawn winch into Gazebo -->
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"  args="-param robot_description -urdf -x 0.0 -y 0.0 -z 1.5 -model winch" />
+
+	<!-- Load joint controller configurations from YAML File to parameter server -->
+  	<rosparam file="$(find ros_robotics)/config/worm_control.yaml"
+		command="load" />
+
+	<!-- Load the controllers -->
+	<node name="control_spawner" pkg="controller_manager"
+		type="spawner" respawn="false"
+		output="screen" ns="/winch" args="joint_state_controller pivot_joint_1_1_controller"/> 
+
+
+	<node name = "motor_model_node"
+    		pkg = "ros_robotics"
+    		type = "motor_model_big_idea"
+    		output = "screen"/>
+
+
+	<node name = "controller_winch_node"
+    		pkg = "ros_robotics"
+    		type = "controller_big_idea_winch"
+    		output = "screen"/>
+</launch>

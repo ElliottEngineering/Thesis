@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+	<world name="default">
+		<physics type="ode">
+			<real_time_update_rate>1000.000000</real_time_update_rate>
+			<max_step_size>0.001</max_step_size>
+			<ode>
+				<solver>
+					<iters>250</iters>
+				</solver>
+			</ode>
+		</physics>
+		<include>
+			<uri>model://sun</uri>
+		</include>
+		<include>
+			<uri>model://construction_cone</uri>
+			<name>construction_cone_1</name>
+			<pose>51.25 51.25 0 0 0 0</pose>
+		</include>
+		<include>
+  			<uri>model://image_ground_plane</uri>
+			<name>Q1</name>
+			<pose>51.25 51.25 0 0 0 0</pose>
+		</include>
+		<include>
+  			<uri>model://image_ground_plane</uri>
+			<name>Q4</name>
+			<pose>-51.25 51.25 0 0 0 0</pose>
+		</include>
+		<include>
+  			<uri>model://image_ground_plane</uri>
+			<name>Q3</name>
+			<pose>-51.25 -51.25 0 0 0 0</pose>
+		</include>
+		<include>
+  			<uri>model://image_ground_plane</uri>
+			<name>Q2</name>
+			<pose>51.25 -51.25 0 0 0 0</pose>
+		</include>
+		<model name="gplane">			
+			<link name="plane">	
+				<collision name="collision">					
+					<geometry>
+						<!--heightmap>
+          						<uri>model://image_ground_plane/materials/textures/sastrugi_1025_0.25-2.png</uri>
+          						<size>102.5 102.5 0.5</size>
+        					</heightmap-->
+						<plane>
+							<normal>0.0 0.0 1.0</normal>
+						</plane>
+					</geometry>
+					<surface>
+						<!--friction>
+							<ode>
+								<mu>0.0</mu>
+								<mu2>0.5</mu2>
+							</ode>
+						</friction-->
+
+						<contact>
+							<ode>
+								<kp>1000000.0</kp>
+								<kd>1.0</kd>							
+							</ode>
+						</contact>
+					</surface>
+					<laser_retro>0.000000</laser_retro>
+				</collision>
+				<visual name="visual">					
+					<geometry>
+						<plane>
+							<normal>0.000000 0.000000 1.000000</normal>
+						</plane>
+						<!--heightmap>
+          						<uri>model://image_ground_plane/materials/textures/sastrugi_1025_0.25-2.png</uri>
+          						<size>102.5 102.5 0.5</size>
+        					</heightmap-->
+					</geometry>
+					<material>
+						<script>
+							<uri>file://media/materials/scripts/gazebo.material</uri>
+							<name>Gazebo/Grey</name>							
+						</script>
+					</material>
+				</visual>
+				<gravity>1</gravity>
+				<self_collide>0</self_collide>
+				<kinematic>0</kinematic>
+			</link>
+			<static>1</static>
+		</model>
+	</world>
+</sdf>

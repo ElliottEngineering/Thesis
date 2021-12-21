@@ -1,0 +1,14 @@
+<launch>
+
+
+	<node name = "Xt_handler_node"
+    		pkg = "ros_robotics"
+    		type = "Xt_train5.py"
+    		/>
+
+
+
+
+
+
+</launch>

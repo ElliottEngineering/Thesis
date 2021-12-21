@@ -1,0 +1,8 @@
+<launch>
+	<node name = "terrain_model_node"
+    		pkg = "ros_robotics"
+    		type = "terrain_model_train3"
+    		output = "screen"/>
+
+
+</launch>

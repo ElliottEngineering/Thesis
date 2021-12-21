@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+	<world name="default">
+		<physics type="ode">
+			<real_time_update_rate>1000.000000</real_time_update_rate>
+			<max_step_size>0.0005</max_step_size>
+		</physics>
+		<include>
+			<uri>model://sun</uri>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 -10 0 0 0 0</pose>
+			<name>Q0</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 0 0 0 0 0</pose>
+			<name>Q1</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 10 0 0 0 0</pose>
+			<name>Q2</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 20 0 0 0 0</pose>
+			<name>Q3</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 30 0 0 0 0</pose>
+			<name>Q4</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 40 0 0 0 0</pose>
+			<name>Q5</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 50 0 0 0 0</pose>
+			<name>Q6</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 60 0 0 0 0</pose>
+			<name>Q7</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 70 0 0 0 0</pose>
+			<name>Q8</name>
+		</include>		
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 80 0 0 0 0</pose>
+			<name>Q9</name>
+		</include>		
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 90 0 0 0 0</pose>
+			<name>Q10</name>
+		</include>
+		<include>
+			<uri>model://cylinder_sastrugi</uri>
+			<pose>0 100 0 0 0 0</pose>
+			<name>Q11</name>
+		</include>		
+	</world>
+</sdf>

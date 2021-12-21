@@ -1,0 +1,54 @@
+<launch>
+  	<!-- values passed by command line input -->
+  	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(find ros_robotics)/worlds/train3.world"/>
+
+		<arg name="paused" default="false"/>
+		<arg name="use_sim_time" default="true"/>
+		<arg name="gui" default="true"/>
+		<arg name="headless" default="false"/>
+		<arg name="debug" default="false"/>
+		<arg name="verbose" default="true"/>
+	</include>
+
+	<!-- Load the URDF into the ROS Parameter Server -->
+	<param name="robot_description"
+  		command="xacro --inorder $(find ros_robotics)/urdf/train3_proposal.urdf.xacro" />
+
+
+	<!-- spawn train3 into Gazebo -->
+	<node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model"  args="-param robot_description -urdf -x 0.0 -y 3.0 -z 1.5 -model train3" />
+
+
+	 <!-- Load joint controller configurations from YAML File to parameter server -->
+  	<rosparam file="$(find ros_robotics)/config/train3_control.yaml"
+		command="load" />
+
+	<!-- Load the controllers -->
+	<node name="control_spawner" pkg="controller_manager"
+		type="spawner" respawn="false"
+		 ns="/dd_robot" args="joint_state_controller"/> 
+
+	<node name = "terrain_model_node"
+    		pkg = "ros_robotics"
+    		type = "terrain_model_train3"
+    		/>
+
+
+	<node name = "motor_model_node"
+    		pkg = "ros_robotics"
+    		type = "motor_model_train3"
+    		/>
+
+	<node name = "Xt_handler_node"
+    		pkg = "ros_robotics"
+    		type = "Xt_train3.py"
+    		/>
+
+	<node name = "controller_train3_node"
+    		pkg = "ros_robotics"
+    		type = "controller_train3"
+    		output = "screen"/>
+
+</launch>
+

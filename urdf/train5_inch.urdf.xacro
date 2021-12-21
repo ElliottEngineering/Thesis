@@ -1,0 +1,477 @@
+<?xml version='1.0'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="train3">
+
+ <xacro:property name="axel_offset" value="0.75" />
+ <xacro:property name="axel_offset2" value="-0.75" />
+ <xacro:property name="axel_z_offset" value="-0.3" />
+
+
+
+ <xacro:property name="connector_x" value="1.5" />
+ <xacro:property name="connector_y" value="0.25" />
+ <xacro:property name="connector_z" value="0.25" />
+ <xacro:property name="connector_mass" value="5" />
+
+ <xacro:property name="body_x" value="1.5" />
+ <xacro:property name="body_y" value="0.5" />
+ <xacro:property name="body_z" value="0.5" />
+ <xacro:property name="body_mass" value="40" />
+
+ <xacro:property name="axle_x" value="0.2" />
+ <!-- actual axle y distance -->
+ <!--xacro:property name="axle_y" value="1.15052" /-->
+ <xacro:property name="axle_y" value="1.15052" />
+ <xacro:property name="axle_z" value="0.2" />
+ <xacro:property name="axle_mass" value="15" />
+
+ <xacro:property name="dummy_radius" value="0.25" />
+  <xacro:property name="pi2" value="1.570796" />
+
+
+
+
+ <xacro:macro name="wheel_gazebo_macro" params="reference">
+ <gazebo reference="${reference}">
+   <mu1>0</mu1>
+   <mu2>0.25</mu2>
+   <fdir1>1 0 0</fdir1>
+   <!-- contact sensor -->
+   <sensor type="contact" name="${reference}_contact_sensor">
+     <update_rate>50.0</update_rate>
+     <always_on>true</always_on>
+     <contact>
+       <collision>${reference}_collision</collision>
+     </contact>
+     <plugin name="lside_bumper_plugin" filename="libgazebo_ros_bumper.so">
+       <bumperTopicName>bumper_${reference}</bumperTopicName>
+       <frameName>World</frameName>
+  </plugin>
+   </sensor>
+ </gazebo>
+ </xacro:macro>
+
+
+
+  <xacro:macro name="wheel_macro" params="name model">
+    <link name="${name}">
+     <inertial>
+      <mass value="7.5"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.49" ixy="0" ixz="0" iyy="0.37" iyz="0" izz="0.37"/>
+     </inertial>
+     <collision>
+       <origin xyz="0 0 0" rpy="0 ${pi2} ${pi2}"/>
+       <laser_retro>0</laser_retro>
+       <max_contacts>10</max_contacts>
+       <pose >0 0 0 0 0 0</pose>
+       <geometry>
+         <cylinder length="0.45" radius="0.28"/>
+       </geometry>
+     </collision>
+     <visual name="visual">
+      <origin rpy="0 ${pi2} ${pi2}" xyz="0 0 0"/>
+      <geometry>
+       <!--mesh filename="package://ros_robotics/meshes/${model}" scale="1 1 1"/-->
+       <cylinder length="0.45" radius="0.28"/>
+      </geometry>
+      <material name="silver">
+       <color rgba="0.75 0.75 0.75 1"/>
+      </material>
+     </visual>
+    </link>
+    <xacro:wheel_gazebo_macro reference="${name}"/>
+  </xacro:macro>
+
+
+ <xacro:macro name="pivot_joint_macro" params="xyz name parent child">
+  <joint name="${name}" type="revolute">
+   <parent link="${parent}"/>
+   <child link="${child}"/>
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <axis xyz="0  0  1"/>
+   <limit effort="1000" lower="-0.35" upper="0.35" velocity="10"/>
+   <dynamics damping="10" friction="0"/>
+   <!--limit effort="-1" lower="-0.001" upper="0.001" velocity="-1"/-->
+  </joint>
+  <xacro:trans_macro name="${name}"/>
+ </xacro:macro>
+
+ <xacro:macro name="pivot_joint_roll_macro" params="xyz name parent child">
+  <joint name="${name}" type="revolute">
+   <parent link="${parent}"/>
+   <child link="${child}"/>
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <axis xyz="1  0  0"/>
+   <limit effort="-1" lower="-0.1" upper="0.1" velocity="-1"/>
+   <!--limit effort="-1" lower="-0.001" upper="0.001" velocity="-1"/-->
+  </joint>
+ </xacro:macro>
+
+ <xacro:macro name="fixed_pivot_joint_macro" params="xyz name parent child">
+  <joint name="${name}" type="revolute">
+   <parent link="${parent}"/>
+   <child link="${child}"/>
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <axis xyz="0  0  1"/>
+   <limit effort="-1" lower="-0.001" upper="0.001" velocity="-1"/>
+   <!--limit effort="-1" lower="-0.001" upper="0.001" velocity="-1"/-->
+  </joint>
+  <xacro:trans_macro name="${name}"/>
+ </xacro:macro>
+
+<xacro:macro name="body_macro" params="xyz name">
+ <link name="${name}">
+  <inertial>
+   <origin xyz="${xyz}"/>
+   <mass value="${body_mass}"/>
+   <inertia ixx="${(1/12)*body_mass*(pow(body_z,2) + pow(body_y,2))}" ixy="0" ixz="0" iyy="${(1/12)*body_mass*(pow(body_z,2) + pow(body_x,2))}" iyz="0" izz="${(1/12)*body_mass*(pow(body_x,2) + pow(body_y,2))}"/>
+  </inertial>
+  <!--collision name="collision">
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <geometry>
+     <box size="${body_x} ${body_y} ${body_z}" />
+   </geometry>
+  </collision-->
+  <visual name="visual">
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <geometry>
+     <box size="${body_x} 0.5 0.5" />
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+  </link>
+ </xacro:macro>
+
+ <xacro:macro name="trans_macro" params="name">
+  <transmission name="simple_trans">
+   <type>transmission_interface/SimpleTransmission</type>
+   <joint name="${name}">
+     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+   </joint>
+   <actuator name="motor_${name}">
+     <mechanicalReduction>1</mechanicalReduction>
+   </actuator>
+  </transmission>
+ </xacro:macro>
+
+<xacro:macro name="axle_macro" params="xyz name">
+ <link name="${name}">
+  <inertial>
+   <mass value="${axle_mass}"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="${(1/12)*axle_mass*(pow(axle_z,2) + pow(axle_y,2))}" ixy="0" ixz="0" iyy="${(1/12)*axle_mass*(pow(axle_z,2) + pow(axle_x,2))}" iyz="0" izz="${(2/12)*axle_mass*(pow(axle_x,2) + pow(axle_y,2))}"/>
+  </inertial>
+  <!--collision name="collision">
+   <origin rpy="0  0  0" xyz="0    0   0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/Front_Axle.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision-->
+  <visual name="visual">
+   <origin rpy="0  0  0" xyz="0 0 0"/>
+   <geometry>
+    <!--mesh filename="package://ros_robotics/meshes/Front_Axle.STL" scale="1 1 1"/-->
+	<box size="${axle_x} ${axle_y} ${axle_z}" />
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+</xacro:macro>
+
+
+
+<xacro:macro name="joint_wheel_macro" params="xyz name parent child">
+ <joint name="${name}" type="revolute">
+  <parent link="${parent}"/>
+  <child link="${child}"/>
+  <origin rpy="0    0    0" xyz="${xyz}"/>
+  <axis xyz="0  1  0"/>
+  <dynamics damping="0" friction="0"/>
+  <limit effort="200" lower="-1e+16" upper="1e+16" velocity="20"/>
+ </joint>
+ <xacro:trans_macro name="${name}"/>
+</xacro:macro>
+
+
+<xacro:macro name="body_joint_macro" params="xyz axis name parent child">
+  <joint name="${name}" type="revolute">
+   <parent link="${parent}"/>
+   <child link="${child}"/>
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <axis xyz="${axis}"/>
+   <!--limit effort="-1" lower="-1000" upper="1000" velocity="-1"/-->
+   <dynamics damping="0.25" friction="0"/>
+   <limit effort="1000" lower="-0.3" upper="0.3" velocity="10"/>
+   <!--limit effort="1000" lower="-0.001" upper="0.001" velocity="10"/-->
+  </joint>
+  <xacro:trans_macro name="${name}"/>
+</xacro:macro>
+
+
+
+
+ <xacro:macro name="fixed_joint_macro" params="xyz name parent child limit">
+  <joint name="${name}" type="prismatic">
+   <parent link="${parent}"/>
+   <child link="${child}"/>
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <axis xyz="1 0 0"/>
+   <dynamics damping="1.0" friction="0"/>
+   <limit effort="1000" lower="${-0.001}" upper="${0.001}" velocity="10"/>
+  </joint>
+ </xacro:macro>
+
+<xacro:macro name="dummy_link_macro" params="xyz name radius">
+ <link name="${name}">
+  <inertial>
+   <mass value="0.001"/>
+   <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+  </inertial>
+  <visual name="visual">
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <geometry>
+     <sphere radius="${radius}"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+  </link>
+ </xacro:macro>
+
+<xacro:macro name="connector_link_macro" params="xyz name">
+ <link name="${name}">
+  <inertial>
+   <mass value="40"/>
+   <inertia ixx="${(1/12)*connector_mass*(pow(connector_z,2) + pow(connector_y,2))}" ixy="0" ixz="0" iyy="${(1/12)*connector_mass*(pow(connector_z,2) + pow(connector_x,2))}" iyz="0" izz="${(1/12)*connector_mass*(pow(connector_x,2) + pow(connector_y,2))}"/>
+  </inertial>
+  <visual name="visual">
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <geometry>
+     <box size="${connector_x} ${connector_y} ${connector_z}" />
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+  </link>
+ </xacro:macro>
+
+<!-- body one -->
+<xacro:body_macro name="body_1" xyz="0 0 0"/>
+<xacro:body_joint_macro name="dummy_joint_front" parent="body_1" child="dummy_link_front" xyz="${+body_x/2} 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_link_front" xyz="0 0 0" radius="${dummy_radius}"/>
+
+<xacro:pivot_joint_macro name="pivot_joint_1_1" parent="body_1" child="pivot_dummy_1_1" xyz="${axel_offset} 0 ${axel_z_offset}"/>
+<xacro:dummy_link_macro name="pivot_dummy_1_1" xyz="0 0 0" radius="0.1"/>
+<xacro:pivot_joint_roll_macro name="pivot_joint_roll_1_1" parent="pivot_dummy_1_1" child="axle_1_1" xyz="0 0 0"/>
+<xacro:axle_macro name="axle_1_1" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_1_1_1" parent="axle_1_1" child="wheel_1_1_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_1_1_2" parent="axle_1_1" child="wheel_1_1_2"/>
+<xacro:wheel_macro name="wheel_1_1_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_1_1_2" model="frostyboy_wheel.STL"/>
+
+<xacro:pivot_joint_macro name="pivot_joint_1_2" parent="body_1" child="axle_1_2" xyz="${axel_offset2} 0 ${axel_z_offset}"/>
+<xacro:axle_macro name="axle_1_2" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_1_2_1" parent="axle_1_2" child="wheel_1_2_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_1_2_2" parent="axle_1_2" child="wheel_1_2_2"/>
+<xacro:wheel_macro name="wheel_1_2_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_1_2_2" model="frostyboy_wheel.STL"/>
+
+1->2 link 
+
+<xacro:body_joint_macro name="body_joint_1_z" parent="body_1" child="dummy_1_1" xyz="${-body_x/2} 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_1_1" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_1_y" parent="dummy_1_1" child="dummy_1_2" xyz="0 0 0" axis="0 1 0"/>
+<xacro:dummy_link_macro name="dummy_1_2" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_1_x" parent="dummy_1_2" child="dummy_1_3" xyz="0 0 0" axis="1 0 0"/>
+<xacro:dummy_link_macro name="dummy_1_3" xyz="0 0 0" radius="${dummy_radius}"/>
+
+
+<xacro:fixed_joint_macro name="fixed_joint_0" parent="dummy_1_3" child="connector_1" xyz="${-connector_x/2} 0 0" limit="0.5"/>
+<xacro:connector_link_macro name="connector_1" xyz="0 0 0"/>
+
+
+<xacro:body_joint_macro name="body_joint_12_y" parent="connector_1" child="dummy_1_4" xyz="${-connector_x/2} 0 0" axis="0 1 0"/>
+<xacro:dummy_link_macro name="dummy_1_4" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_12_z" parent="dummy_1_4" child="dummy_1_5" xyz="0 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_1_5" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:fixed_joint_macro name="fixed_joint_1" parent="dummy_1_5" child="body_2" xyz="${-body_x/2} 0 0" limit="0.0001"/>
+
+
+<xacro:body_macro name="body_2" xyz="0 0 0"/>
+
+<xacro:pivot_joint_macro name="pivot_joint_2_1" parent="body_2" child="pivot_dummy_2_1" xyz="${axel_offset} 0 ${axel_z_offset}"/>
+<xacro:dummy_link_macro name="pivot_dummy_2_1" xyz="0 0 0" radius="0.1"/>
+<xacro:pivot_joint_roll_macro name="pivot_joint_roll_2_1" parent="pivot_dummy_2_1" child="axle_2_1" xyz="0 0 0"/>
+<xacro:axle_macro name="axle_2_1" xyz="0 0 0"/>
+
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_2_1_1" parent="axle_2_1" child="wheel_2_1_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_2_1_2" parent="axle_2_1" child="wheel_2_1_2"/>
+<xacro:wheel_macro name="wheel_2_1_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_2_1_2" model="frostyboy_wheel.STL"/>
+
+<xacro:pivot_joint_macro name="pivot_joint_2_2" parent="body_2" child="axle_2_2" xyz="${axel_offset2} 0 ${axel_z_offset}"/>
+<xacro:axle_macro name="axle_2_2" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_2_2_1" parent="axle_2_2" child="wheel_2_2_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_2_2_2" parent="axle_2_2" child="wheel_2_2_2"/>
+<xacro:wheel_macro name="wheel_2_2_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_2_2_2" model="frostyboy_wheel.STL"/>
+
+
+<xacro:body_joint_macro name="body_joint_2_z" parent="body_2" child="dummy_2_1" xyz="${-body_x/2} 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_2_1" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_2_y" parent="dummy_2_1" child="dummy_2_2" xyz="0 0 0" axis="0 1 0"/>
+<xacro:dummy_link_macro name="dummy_2_2" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_2_x" parent="dummy_2_2" child="dummy_2_3" xyz="0 0 0" axis="1 0 0"/>
+<xacro:dummy_link_macro name="dummy_2_3" xyz="0 0 0" radius="${dummy_radius}"/>
+
+<xacro:fixed_joint_macro name="fixed_joint_2" parent="dummy_2_3" child="connector_2" xyz="${-connector_x/2} 0 0" limit="0.5"/>
+<xacro:connector_link_macro name="connector_2" xyz="0 0 0"/>
+
+
+
+<xacro:body_joint_macro name="body_joint_22_y" parent="connector_2" child="dummy_2_4" xyz="${-connector_x/2} 0 0" axis="0 1 0"/>
+<xacro:dummy_link_macro name="dummy_2_4" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_22_z" parent="dummy_2_4" child="dummy_2_5" xyz="0 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_2_5" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:fixed_joint_macro name="fixed_joint_3" parent="dummy_2_5" child="body_3" xyz="${-body_x/2} 0 0" limit="0.0001"/>
+
+
+<xacro:body_macro name="body_3" xyz="0 0 0"/>
+
+
+<xacro:pivot_joint_macro name="pivot_joint_3_1" parent="body_3" child="pivot_dummy_3_1" xyz="${axel_offset} 0 ${axel_z_offset}"/>
+<xacro:dummy_link_macro name="pivot_dummy_3_1" xyz="0 0 0" radius="0.1"/>
+<xacro:pivot_joint_roll_macro name="pivot_joint_roll_3_1" parent="pivot_dummy_3_1" child="axle_3_1" xyz="0 0 0"/>
+<xacro:axle_macro name="axle_3_1" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_3_1_1" parent="axle_3_1" child="wheel_3_1_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_3_1_2" parent="axle_3_1" child="wheel_3_1_2"/>
+<xacro:wheel_macro name="wheel_3_1_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_3_1_2" model="frostyboy_wheel.STL"/>
+
+<xacro:pivot_joint_macro name="pivot_joint_3_2" parent="body_3" child="axle_3_2" xyz="${axel_offset2} 0 ${axel_z_offset}"/>
+<xacro:axle_macro name="axle_3_2" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_3_2_1" parent="axle_3_2" child="wheel_3_2_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_3_2_2" parent="axle_3_2" child="wheel_3_2_2"/>
+<xacro:wheel_macro name="wheel_3_2_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_3_2_2" model="frostyboy_wheel.STL"/>
+
+<!--
+
+
+<xacro:body_joint_macro name="body_joint_3_z" parent="body_3" child="dummy_3_1" xyz="${-body_x/2} 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_3_1" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_3_y" parent="dummy_3_1" child="dummy_3_2" xyz="0 0 0" axis="0 1 0"/>
+<xacro:dummy_link_macro name="dummy_3_2" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_3_x" parent="dummy_3_2" child="dummy_3_3" xyz="0 0 0" axis="1 0 0"/>
+<xacro:dummy_link_macro name="dummy_3_3" xyz="0 0 0" radius="${dummy_radius}"/>
+
+<xacro:fixed_joint_macro name="fixed_joint_4" parent="dummy_3_3" child="connector_3" xyz="${-connector_x/2} 0 0" limit="0.5"/>
+<xacro:connector_link_macro name="connector_3" xyz="0 0 0"/>
+
+
+
+<xacro:body_joint_macro name="body_joint_32_y" parent="connector_3" child="dummy_3_4" xyz="${-connector_x/2} 0 0" axis="0 1 0"/>
+<xacro:dummy_link_macro name="dummy_3_4" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_32_z" parent="dummy_3_4" child="dummy_3_5" xyz="0 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_3_5" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:fixed_joint_macro name="fixed_joint_5" parent="dummy_3_5" child="body_4" xyz="${-body_x/2} 0 0" limit="0.0001"/>
+
+
+
+<xacro:body_macro name="body_4" xyz="0 0 0"/>
+
+
+<xacro:pivot_joint_macro name="pivot_joint_4_1" parent="body_4" child="pivot_dummy_4_1" xyz="${axel_offset} 0 ${axel_z_offset}"/>
+<xacro:dummy_link_macro name="pivot_dummy_4_1" xyz="0 0 0" radius="0.1"/>
+<xacro:pivot_joint_roll_macro name="pivot_joint_roll_4_1" parent="pivot_dummy_4_1" child="axle_4_1" xyz="0 0 0"/>
+<xacro:axle_macro name="axle_4_1" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_4_1_1" parent="axle_4_1" child="wheel_4_1_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_4_1_2" parent="axle_4_1" child="wheel_4_1_2"/>
+<xacro:wheel_macro name="wheel_4_1_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_4_1_2" model="frostyboy_wheel.STL"/>
+
+<xacro:pivot_joint_macro name="pivot_joint_4_2" parent="body_4" child="axle_4_2" xyz="${axel_offset2} 0 ${axel_z_offset}"/>
+<xacro:axle_macro name="axle_4_2" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_4_2_1" parent="axle_4_2" child="wheel_4_2_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_4_2_2" parent="axle_4_2" child="wheel_4_2_2"/>
+<xacro:wheel_macro name="wheel_4_2_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_4_2_2" model="frostyboy_wheel.STL"/>
+
+
+<xacro:body_joint_macro name="body_joint_4_z" parent="body_4" child="dummy_4_1" xyz="${-body_x/2} 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_4_1" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_4_y" parent="dummy_4_1" child="dummy_4_2" xyz="0 0 0" axis="0 1 0"/>
+<xacro:dummy_link_macro name="dummy_4_2" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_4_x" parent="dummy_4_2" child="dummy_4_3" xyz="0 0 0" axis="1 0 0"/>
+<xacro:dummy_link_macro name="dummy_4_3" xyz="0 0 0" radius="${dummy_radius}"/>
+
+<xacro:fixed_joint_macro name="fixed_joint_6" parent="dummy_4_3" child="connector_4" xyz="${-connector_x/2} 0 0" limit="0.5"/>
+<xacro:connector_link_macro name="connector_4" xyz="0 0 0"/>
+
+
+
+<xacro:body_joint_macro name="body_joint_42_y" parent="connector_4" child="dummy_4_4" xyz="${-connector_x/2} 0 0" axis="0 1 0"/>
+<xacro:dummy_link_macro name="dummy_4_4" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:body_joint_macro name="body_joint_42_z" parent="dummy_4_4" child="dummy_4_5" xyz="0 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_4_5" xyz="0 0 0" radius="${dummy_radius}"/>
+<xacro:fixed_joint_macro name="fixed_joint_7" parent="dummy_4_5" child="body_5" xyz="${-body_x/2} 0 0" limit="0.0001"/>
+
+
+
+<xacro:body_macro name="body_5" xyz="0 0 0"/>
+
+
+<xacro:pivot_joint_macro name="pivot_joint_5_1" parent="body_5" child="pivot_dummy_5_1" xyz="${axel_offset} 0 ${axel_z_offset}"/>
+<xacro:dummy_link_macro name="pivot_dummy_5_1" xyz="0 0 0" radius="0.1"/>
+<xacro:pivot_joint_roll_macro name="pivot_joint_roll_5_1" parent="pivot_dummy_5_1" child="axle_5_1" xyz="0 0 0"/>
+<xacro:axle_macro name="axle_5_1" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_5_1_1" parent="axle_5_1" child="wheel_5_1_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_5_1_2" parent="axle_5_1" child="wheel_5_1_2"/>
+<xacro:wheel_macro name="wheel_5_1_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_5_1_2" model="frostyboy_wheel.STL"/>
+
+<xacro:pivot_joint_macro name="pivot_joint_5_2" parent="body_5" child="axle_5_2" xyz="${axel_offset2} 0 ${axel_z_offset}"/>
+<xacro:axle_macro name="axle_5_2" xyz="0 0 0"/>
+
+<xacro:joint_wheel_macro xyz="0  ${axle_y/2} 0" name="joint_wheel_5_2_1" parent="axle_5_2" child="wheel_5_2_1"/>
+<xacro:joint_wheel_macro xyz="0  -${axle_y/2} 0" name="joint_wheel_5_2_2" parent="axle_5_2" child="wheel_5_2_2"/>
+<xacro:wheel_macro name="wheel_5_2_1" model="frostyboy_wheel.STL"/>
+<xacro:wheel_macro name="wheel_5_2_2" model="frostyboy_wheel.STL"/>
+
+
+-->
+
+
+<xacro:body_joint_macro name="dummy_joint_back" parent="body_3" child="dummy_link_back" xyz="${-body_x/2} 0 0" axis="0 0 1"/>
+<xacro:dummy_link_macro name="dummy_link_back" xyz="0 0 0" radius="${dummy_radius}"/>
+
+
+
+<!-- https://answers.ros.org/question/258420/ball-joint-in-urdf/ -->
+<!--check_urdf <(xacro inorder train3_final.urdf.xacro) put two dashes before inorder-->
+
+<gazebo>
+  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+   <robotNamespace>/dd_robot</robotNamespace>
+   <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+   <legacyModeNS>true</legacyModeNS>
+  </plugin>
+</gazebo>
+
+
+</robot>

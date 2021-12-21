@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+	<world name="default">
+		<physics type="ode">
+			<real_time_update_rate>2000.000000</real_time_update_rate>
+			<max_step_size>0.0005</max_step_size>
+		</physics>
+		<include>
+			<uri>model://sun</uri>
+		</include>
+		<include>
+			<uri>model://construction_cone</uri>
+			<name>construction_cone_1</name>
+			<pose>51.25 51.25 0 0 0 0</pose>
+		</include>
+		
+		<model name="gplane">			
+			<link name="plane">	
+				<collision name="collision">					
+					<geometry>
+
+						<plane>
+							<normal>0.000000 0.000000 1.000000</normal>
+						</plane>
+					</geometry>
+					<surface>
+						<friction>
+							<ode>
+								<mu>0.5</mu>
+								<mu2>0.5</mu2>
+							</ode>
+						</friction>
+						<bounce>
+							<restitution_coefficient>0.000000</restitution_coefficient>
+							<threshold>100000.000000</threshold>
+						</bounce>
+						<contact>
+							<ode>
+								<kp>800000.000000</kp>
+								<kd>0.020000</kd>							
+							</ode>
+						</contact>
+					</surface>
+					<laser_retro>0.000000</laser_retro>
+				</collision>
+				<visual name="visual">					
+					<geometry>
+						<plane>
+							<normal>0.000000 0.000000 1.000000</normal>
+						</plane>
+
+					</geometry>
+					<material>
+						<script>
+							<uri>file://media/materials/scripts/gazebo.material</uri>
+							<name>Gazebo/Grey</name>							
+						</script>
+					</material>
+				</visual>
+				<gravity>1</gravity>
+				<self_collide>0</self_collide>
+				<kinematic>0</kinematic>
+			</link>
+			<static>1</static>
+		</model>
+	</world>
+</sdf>

@@ -1,0 +1,6 @@
+<launch>
+	<node name = "controller_worm_node"
+    		pkg = "ros_robotics"
+    		type = "controller_worm"
+    		output = "screen"/>
+</launch>

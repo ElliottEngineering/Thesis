@@ -1,0 +1,192 @@
+<?xml version='1.0'?>
+<robot name="ddrobot">
+ <link name="base_link">
+  <inertial>
+   <mass value="65"/>
+   <origin rpy="1.560795  0       0" xyz="-0.39318  0.62378 0.1"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="1.560795  0       0" xyz="-0.39318  0.62378 -0.03459"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/body.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="1.560795  0       0" xyz="-0.39318  0.62378 -0.03459"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/body.STL" scale="1 1 1"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+ <joint name="joint_pivot" type="revolute">
+  <parent link="base_link"/>
+  <child link="front_axle"/>
+  <origin rpy="0    0   -1.57" xyz="-0.39318  0.07711  0.00165"/>
+  <axis xyz="0  0  1"/>
+  <limit effort="-1" lower="-0.157" upper="0.157" velocity="-1"/>
+ </joint>
+ <joint name="joint_back_left" type="continuous">
+  <parent link="base_link"/>
+  <child link="back_left"/>
+  <origin rpy="0  0  0" xyz="0.18208  1.13494 -0.09617"/>
+  <axis xyz="1  0  0"/>
+  <limit effort="90" velocity="20"/>
+ </joint>
+ <joint name="joint_back_right" type="continuous">
+  <parent link="base_link"/>
+  <child link="back_right"/>
+  <origin rpy="0  0  0" xyz="-0.96759  1.13494 -0.09617"/>
+  <axis xyz="1  0  0"/>
+  <limit effort="90" velocity="20"/>
+ </joint>
+ <joint name="joint_front_left" type="continuous">
+  <parent link="front_axle"/>
+  <child link="front_left"/>
+  <origin rpy="0    0    1.57" xyz="0.00186  0.57526 -0.09782"/>
+  <axis xyz="1  0  0"/>
+  <limit effort="90" velocity="20"/>
+ </joint>
+ <joint name="joint_front_right" type="continuous">
+  <parent link="front_axle"/>
+  <child link="front_right"/>
+  <origin rpy="-2.36140000e+00  -3.00000000e-05   1.57004000e+00" xyz="0.00094 -0.57441 -0.09782"/>
+  <axis xyz="1.00000000e+00   6.00000000e-05   0.00000000e+00"/>
+  <limit velocity="20" effort="90"/>
+ </joint>
+ <link name="back_left">
+  <inertial>
+   <mass value="5"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/front_left_wheel.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/front_left_wheel.STL" scale="1 1 1"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+ <link name="back_right">
+  <inertial>
+   <mass value="5"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/front_left_wheel.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/front_left_wheel.STL" scale="1 1 1"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+ <link name="front_axle">
+  <inertial>
+   <mass value="15"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="0  0  0" xyz="0    0   -0.09"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/Front Axle.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0  0  0" xyz="0    0   -0.09"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/Front Axle.STL" scale="1 1 1"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+ <link name="front_left">
+  <inertial>
+   <mass value="5"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/front_left_wheel.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/front_left_wheel.STL" scale="1 1 1"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+ <link name="front_right">
+  <inertial>
+   <mass value="5"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="collision_front_right">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/front_left_wheel.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/front_left_wheel.STL" scale="1 1 1"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+ <gazebo>
+  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+   <robotNamespace>/dd_robot</robotNamespace>
+   <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+   <legacyModeNS>true</legacyModeNS>
+  </plugin>
+ </gazebo>
+
+ <gazebo reference="front_right">
+   <!-- contact sensor -->
+   <sensor type="contact" name="front_right_contact_sensor">
+     <update_rate>10.0</update_rate>
+     <always_on>true</always_on>
+     <contact>
+       <collision>front_right_fixed_joint_lump__collision_front_right_collision</collision>
+     </contact>
+     <plugin name="lside_bumper_plugin" filename="libgazebo_ros_bumper.so">
+       <bumperTopicName>front_right_bumper</bumperTopicName>
+       <frameName>world</frameName>
+  </plugin>
+   </sensor>
+ </gazebo>
+</robot>

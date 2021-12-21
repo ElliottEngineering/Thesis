@@ -1,0 +1,11 @@
+<launch>
+	<node name = "controller_train3_node"
+    		pkg = "ros_robotics"
+    		type = "controller_train3_final"
+    		/>
+
+	<node name = "speed_control_node"
+    		pkg = "ros_robotics"
+    		type = "speed_control_train3"
+    		/>
+</launch>

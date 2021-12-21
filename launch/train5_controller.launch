@@ -1,0 +1,52 @@
+<launch>
+	<node name = "controller_node"
+    		pkg = "ros_robotics"
+    		type = "controller_train5"		
+    		output = "screen"/>
+
+	<node name = "speed_controller_node"
+    		pkg = "ros_robotics"
+    		type = "speed_control_train5"		
+    		output = "screen"/>
+
+	<!--node name = "immobilization_node"
+    		pkg = "ros_robotics"
+    		type = "immobilization_detect_train5"		
+    		output="screen"/>
+
+	<node name = "Xt_handler_node"
+    		pkg = "ros_robotics"
+    		type = "Xt_train5.py"
+    		/>
+
+	<node name = "motor_model_node"
+    		pkg = "ros_robotics"
+    		type = "motor_model_train5"
+    		output="screen"/-->
+
+	<!--node name = "energy_node"
+    		pkg = "ros_robotics"
+    		type = "energy_train5"
+    		output="screen"/-->
+
+
+
+	<!--node name = "terrain_model_node"
+    		pkg = "ros_robotics"
+    		type = "terrain_model_train5"
+    		/>
+
+	<node name = "motor_model_node"
+    		pkg = "ros_robotics"
+    		type = "motor_model_train5"
+    		/-->
+
+	<!--node name = "motor_model_service_node"
+    		pkg = "ros_robotics"
+    		type = "motor_model_service_train5"
+    		/-->
+
+
+
+
+</launch>

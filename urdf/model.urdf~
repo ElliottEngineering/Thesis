@@ -1,0 +1,152 @@
+<?xml version='1.0'?>
+<robot name="dd_robot">
+ <link name="base_link">
+  <inertial>
+   <mass value="65"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="frostyboy2__collision">
+   <origin rpy="1.56947  0       0" xyz="-0.39318  0.62378 -0.03459"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/body.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="frostyboy2__visual">
+   <origin rpy="1.56947  0       0" xyz="-0.39318  0.62378 -0.03459"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/body.STL" scale="1 1 1"/>
+   </geometry>
+  </visual>
+ </link>
+ <joint name="frostyboy2__joint_pivot" type="revolute">
+  <parent link="base_link"/>
+  <child link="frostyboy2__front_axle"/>
+  <origin rpy="0    0   -1.57" xyz="-0.39318  0.07711  0.00165"/>
+  <axis xyz="0  0  1"/>
+  <limit effort="-1.0" lower="-0.157" upper="0.157" velocity="-1.0"/>
+ </joint>
+ <joint name="frostyboy2__joint_back_left" type="revolute">
+  <parent link="base_link"/>
+  <child link="frostyboy2__back_left"/>
+  <origin rpy="0  0  0" xyz="0.18208  1.13494 -0.09617"/>
+  <axis xyz="1  0  0"/>
+  <limit effort="-1.0" lower="-1.79769e+308" upper="1.79769e+308" velocity="-1.0"/>
+ </joint>
+ <joint name="frostyboy2__joint_back_right" type="revolute">
+  <parent link="base_link"/>
+  <child link="frostyboy2__back_right"/>
+  <origin rpy="0  0  0" xyz="-0.96759  1.13494 -0.09617"/>
+  <axis xyz="1  0  0"/>
+  <limit effort="-1.0" lower="-1.79769e+308" upper="1.79769e+308" velocity="-1.0"/>
+ </joint>
+ <joint name="frostyboy2__joint_front_left" type="revolute">
+  <parent link="frostyboy2__front_axle"/>
+  <child link="frostyboy2__front_left"/>
+  <origin rpy="0    0    1.57" xyz="0.00186  0.57526 -0.09782"/>
+  <axis xyz="1  0  0"/>
+  <limit effort="-1.0" lower="-1.79769e+308" upper="1.79769e+308" velocity="-1.0"/>
+ </joint>
+ <joint name="frostyboy2__joint_front_right" type="revolute">
+  <parent link="frostyboy2__front_axle"/>
+  <child link="frostyboy2__front_right"/>
+  <origin rpy="-2.36140000e+00  -3.00000000e-05   1.57004000e+00" xyz="0.00094 -0.57441 -0.09782"/>
+  <axis xyz="1.00000000e+00   6.00000000e-05   0.00000000e+00"/>
+  <limit effort="-1.0" lower="-1.79769e+308" upper="1.79769e+308" velocity="-1.0"/>
+ </joint>
+ <link name="frostyboy2__back_left">
+  <inertial>
+   <mass value="5"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="frostyboy2__collision">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/front_left_wheel.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="frostyboy2__visual">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/front_left_wheel.STL" scale="1 1 1"/>
+   </geometry>
+  </visual>
+ </link>
+ <link name="frostyboy2__back_right">
+  <inertial>
+   <mass value="5"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="frostyboy2__collision">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/front_left_wheel.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="frostyboy2__visual">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/front_left_wheel.STL" scale="1 1 1"/>
+   </geometry>
+  </visual>
+ </link>
+ <link name="frostyboy2__front_axle">
+  <inertial>
+   <mass value="15"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="frostyboy2__collision">
+   <origin rpy="0  0  0" xyz="0    0   -0.09"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/Front Axle.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="frostyboy2__visual">
+   <origin rpy="0  0  0" xyz="0    0   -0.09"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/Front Axle.STL" scale="1 1 1"/>
+   </geometry>
+  </visual>
+ </link>
+ <link name="frostyboy2__front_left">
+  <inertial>
+   <mass value="5"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="frostyboy2__collision">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/front_left_wheel.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="frostyboy2__visual">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/front_left_wheel.STL" scale="1 1 1"/>
+   </geometry>
+  </visual>
+ </link>
+ <link name="frostyboy2__front_right">
+  <inertial>
+   <mass value="5"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.166667" ixy="0" ixz="0" iyy="0.166667" iyz="0" izz="0.166667"/>
+  </inertial>
+  <collision name="frostyboy2__collision">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/front_left_wheel.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="frostyboy2__visual">
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <geometry>
+    <mesh filename="package://PATHTOMESHES/catkin_ws/src/frostyboy2/meshes/front_left_wheel.STL" scale="1 1 1"/>
+   </geometry>
+  </visual>
+ </link>
+</robot>

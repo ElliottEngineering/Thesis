@@ -1,0 +1,6 @@
+<launch>
+	<node name = "rope_model_FB_node"
+    		pkg = "ros_robotics"
+    		type = "rope_model_FB"
+    		output = "screen"/>
+</launch>

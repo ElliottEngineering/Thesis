@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+	<world name="default">
+		<physics type="ode">
+			<real_time_update_rate>2000.000000</real_time_update_rate>
+			<max_step_size>0.0005</max_step_size>
+		</physics>
+		<include>
+			<uri>model://sun</uri>
+		</include>
+		<include>
+			<uri>model://construction_cone</uri>
+			<name>construction_cone_1</name>
+			<pose>3.0 0 0 0 0 0</pose>
+		</include>
+		<include>
+			<uri>model://construction_cone</uri>
+			<name>construction_cone_2</name>
+			<pose>-3.0 0 0 0 0 0</pose>
+		</include>
+		<model name="gplane">
+			<pose>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</pose>			
+			<link name="plane">			
+				<pose>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</pose>
+				<collision name="plane">
+					<pose>0.000000 0.000000 0.000000 0.000000 -0.000000 0.000000</pose>
+					<geometry>
+						<plane>
+							<normal>0.000000 0.000000 1.000000</normal>
+						</plane>
+					</geometry>
+					<surface>
+						<friction>
+							<ode>
+								<mu>0.000001</mu>
+								<mu2>0.000001</mu2>
+							</ode>
+						</friction>
+						<bounce>
+							<restitution_coefficient>0.000000</restitution_coefficient>
+							<threshold>100000.000000</threshold>
+						</bounce>
+						<contact>
+							<ode>
+								<kp>800000.000000</kp>
+								<kd>0.020000</kd>
+								<!-- soft_cfm>0.000000</soft_cfm>
+								<soft_erp>0.200000</soft_erp>
+								<kp>100000.000000</kp>
+								<kd>0.500000</kd>
+								<max_vel>100.000000</max_vel>
+								<min_depth>0.001000</min_depth !-->
+							</ode>
+						</contact>
+					</surface>
+					<laser_retro>0.000000</laser_retro>
+				</collision>
+				<gravity>1</gravity>
+				<self_collide>0</self_collide>
+				<kinematic>0</kinematic>
+			</link>
+			<static>1</static>
+		</model>
+	</world>
+</sdf>

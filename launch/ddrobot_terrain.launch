@@ -1,0 +1,17 @@
+<launch>
+	<node name = "terrain_model_node"
+    		pkg = "ros_robotics"
+    		type = "terrain_model"
+    		output = "screen"/>
+
+
+	<node name = "motor_model_node"
+    		pkg = "ros_robotics"
+    		type = "motor_model"
+    		output = "screen"/>
+
+	<node name = "Xt_handler_node"
+    		pkg = "ros_robotics"
+    		type = "Xt.py"
+    		output = "screen"/>
+</launch>

@@ -1,0 +1,349 @@
+<?xml version='1.0'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="winch">
+
+ <xacro:property name="axel_offset" value="0.5" />
+ <xacro:property name="axel_offset2" value="-0.5" />
+ <xacro:property name="axel_z_offset" value="-0.3" />
+ <xacro:property name="connector_length" value="1.5" />
+
+
+ <xacro:property name="connector_x" value="1.5" />
+ <xacro:property name="connector_y" value="0.25" />
+ <xacro:property name="connector_z" value="0.25" />
+ <xacro:property name="connector_mass" value="5" />
+
+ <xacro:property name="body_x" value="0.5" />
+ <xacro:property name="body_y" value="0.103" />
+ <xacro:property name="body_z" value="0.025" />
+ <xacro:property name="body_mass" value="1.35" />
+
+ <xacro:property name="body_to_axle" value="0.094" />
+
+ <xacro:property name="axle_x" value="0.2" />
+ <xacro:property name="axle_y" value="1" />
+ <xacro:property name="axle_z" value="0.2" />
+ <xacro:property name="axle_mass" value="15" />
+
+ <xacro:property name="axle_pivot_mass" value="1" />
+ <xacro:property name="axle_pivot_x" value="0.04" />
+ <xacro:property name="axle_pivot_y" value="0.04" />
+ <xacro:property name="axle_pivot_z" value="0.1" />
+
+ <xacro:property name="dummy_radius" value="0.01" />
+ <xacro:property name="wheel_radius" value="0.1335" />
+
+<xacro:property name="pi" value="3.141592" />
+<xacro:property name="pi2" value="1.570296" />
+<xacro:property name="pi4" value="0.785398" />
+
+
+
+
+
+ <xacro:macro name="wheel_bumper_macro" params="reference">
+ <gazebo reference="${reference}">
+   <!-- contact sensor -->
+   <sensor type="contact" name="${reference}_contact_sensor">
+     <update_rate>50.0</update_rate>
+     <always_on>true</always_on>
+     <contact>
+       <collision>${reference}_collision</collision>
+     </contact>
+     <plugin name="lside_bumper_plugin" filename="libgazebo_ros_bumper.so">
+       <bumperTopicName>bumper_${reference}</bumperTopicName>
+       <frameName>World</frameName>
+  </plugin>
+   </sensor>
+ </gazebo>
+ </xacro:macro>
+
+
+
+  <xacro:macro name="wheel_macro" params="name model">
+    <link name="${name}">
+     <inertial>
+      <mass value="0.83"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0.16" ixy="0" ixz="0" iyy="0.25" iyz="0" izz="0.16"/>
+     </inertial>
+     <collision>
+       <origin xyz="0 0 0" rpy="0 ${pi2} ${pi2} "/>
+       <laser_retro>0</laser_retro>
+       <max_contacts>10</max_contacts>
+       <pose >0 0 0 0 0 0</pose>
+       <geometry>
+         <cylinder length="0.15" radius="${wheel_radius}"/>
+       </geometry>
+     </collision>
+     <visual name="visual">
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+       <mesh filename="package://ros_robotics/meshes/${model}" scale="1 1 1"/>
+      </geometry>
+      <material name="silver">
+       <color rgba="0.75 0.75 0.75 1"/>
+      </material>
+     </visual>
+    </link>
+    <xacro:wheel_bumper_macro reference="${name}"/>
+  </xacro:macro>
+
+
+ <xacro:macro name="pivot_joint_macro" params="xyz axis name parent child">
+  <joint name="${name}" type="revolute">
+   <parent link="${parent}"/>
+   <child link="${child}"/>
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <axis xyz="${axis}"/>
+   <limit effort="-1" lower="-0.3" upper="0.3" velocity="-1"/>
+   <!--limit effort="-1" lower="-0.001" upper="0.001" velocity="-1"/-->
+  </joint>
+  <xacro:trans_macro name="${name}"/>
+ </xacro:macro>
+
+
+
+<xacro:macro name="body_macro" params="xyz name">
+ <link name="${name}">
+  <inertial>
+   <origin xyz="${xyz}"/>
+   <mass value="${body_mass}"/>
+   <inertia ixx="${(1/12)*body_mass*(pow(body_z,2) + pow(body_y,2))}" ixy="0" ixz="0" iyy="${(1/12)*body_mass*(pow(body_z,2) + pow(body_x,2))}" iyz="0" izz="${(1/12)*body_mass*(pow(body_x,2) + pow(body_y,2))}"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <geometry>
+     <box size="${body_x} ${body_y} ${body_z}" />
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <geometry>
+     <box size="${body_x} ${body_y} ${body_z}" />
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+  </link>
+ </xacro:macro>
+
+ <xacro:macro name="trans_macro" params="name">
+  <transmission name="simple_trans">
+   <type>transmission_interface/SimpleTransmission</type>
+   <joint name="${name}">
+     <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+   </joint>
+   <actuator name="motor_${name}">
+     <mechanicalReduction>1</mechanicalReduction>
+   </actuator>
+  </transmission>
+ </xacro:macro>
+
+<xacro:macro name="axle_macro" params="xyz name">
+ <link name="${name}">
+  <inertial>
+   <mass value="${axle_mass}"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="${(1/12)*axle_mass*(pow(axle_z,2) + pow(axle_y,2))}" ixy="0" ixz="0" iyy="${(1/12)*axle_mass*(pow(axle_z,2) + pow(axle_x,2))}" iyz="0" izz="${(1/12)*axle_mass*(pow(axle_x,2) + pow(axle_y,2))}"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="0 0 0" xyz="0    0   0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/big_idea_axle.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0 0 0" xyz="0 0 0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/big_idea_axle.STL" scale="1.0 1.0 1.0"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+</xacro:macro>
+
+<xacro:macro name="part_macro" params="name model mass">
+ <link name="${name}">
+  <inertial>
+   <mass value="${mass}"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>
+   <inertia ixx="0.49" ixy="0" ixz="0" iyy="0.37" iyz="0" izz="0.37"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="0 0 0" xyz="0    0   0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/${model}" scale="1.0 1.0 1.0"/>
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0 0 0" xyz="0 0 0"/>
+   <geometry>
+    <mesh filename="package://ros_robotics/meshes/${model}" scale="1.0 1.0 1.0"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+</xacro:macro>
+
+ <xacro:macro name="fixed_joint_macro" params="xyz name parent child">
+  <joint name="${name}" type="prismatic">
+   <parent link="${parent}"/>
+   <child link="${child}"/>
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <axis xyz="1 0 0"/>
+   <limit effort="-1" lower="-0.0001" upper="0.0001" velocity="-1"/>
+  </joint>
+ </xacro:macro>
+
+<xacro:macro name="axle_pivot_link_macro" params="xyz name">
+ <link name="${name}">
+  <inertial>
+   <mass value="${axle_pivot_mass}"/>
+   <origin rpy="0  0  0" xyz="0  0  0"/>   
+      <inertia ixx="${(1/12)*axle_pivot_mass*(pow(axle_pivot_z,2) + pow(axle_pivot_y,2))}" ixy="0" ixz="0" iyy="${(1/12)*axle_pivot_mass*(pow(axle_pivot_z,2) + pow(axle_pivot_x,2))}" iyz="0" izz="${(1/12)*axle_pivot_mass*(pow(axle_pivot_x,2) + pow(axle_pivot_y,2))}"/>
+  </inertial>
+  <collision name="collision">
+   <origin rpy="0  0  0" xyz="0 0 0"/>
+   <geometry>
+     <box size="${axle_pivot_x} ${axle_pivot_y} ${axle_pivot_z}" />
+   </geometry>
+  </collision>
+  <visual name="visual">
+   <origin rpy="0  0  0" xyz="0 0 0"/>
+   <geometry>
+     <box size="${axle_pivot_x} ${axle_pivot_y} ${axle_pivot_z}" />
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+ </link>
+</xacro:macro>
+
+ <xacro:macro name="sliding_joint_macro" params="xyz name parent child">
+  <joint name="${name}" type="prismatic">
+   <parent link="${parent}"/>
+   <child link="${child}"/>
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <axis xyz="1  0  0"/>
+   <limit effort="1000" lower="0" upper="${7*body_x/8}" velocity="0.1"/>   
+  </joint>
+  <xacro:trans_macro name="${name}"/>
+ </xacro:macro>
+
+
+
+<xacro:macro name="joint_wheel_macro" params="xyz name parent child">
+ <joint name="${name}" type="revolute">
+  <parent link="${parent}"/>
+  <child link="${child}"/>
+  <origin rpy="0    0    0" xyz="${xyz}"/>
+  <axis xyz="0  1  0"/>
+  <limit effort="200" lower="-1e+16" upper="1e+16" velocity="-1"/>
+ </joint>
+ <xacro:trans_macro name="${name}"/>
+</xacro:macro>
+
+
+
+<xacro:macro name="dummy_link_macro" params="xyz name">
+ <link name="${name}">
+  <inertial>
+   <mass value="0.001"/>
+   <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+  </inertial>
+  <visual name="visual">
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <geometry>
+     <sphere radius="${dummy_radius}"/>
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+  </link>
+ </xacro:macro>
+
+<xacro:macro name="connector_link_macro" params="xyz name">
+ <link name="${name}">
+  <inertial>
+   <mass value="40"/>
+   <inertia ixx="${(1/12)*connector_mass*(pow(connector_z,2) + pow(connector_y,2))}" ixy="0" ixz="0" iyy="${(1/12)*connector_mass*(pow(connector_z,2) + pow(connector_x,2))}" iyz="0" izz="${(1/12)*connector_mass*(pow(connector_x,2) + pow(connector_y,2))}"/>
+  </inertial>
+  <visual name="visual">
+   <origin rpy="0 0 0" xyz="${xyz}"/>
+   <geometry>
+     <box size="${connector_length} ${connector_y} ${connector_z}" />
+   </geometry>
+   <material name="silver">
+    <color rgba="0.75 0.75 0.75 1"/>
+   </material>
+  </visual>
+  </link>
+ </xacro:macro>
+
+
+
+<xacro:body_macro name="body_1" xyz="0 0 0"/>
+
+<xacro:pivot_joint_macro name="front_axle_yaw_joint" parent="body_1" child="front_pivot_link" xyz="${body_x/4} 0 ${body_to_axle/2}" axis="0 0 1"/>
+<xacro:axle_pivot_link_macro name="front_pivot_link" xyz="0 0 0"/>
+<xacro:pivot_joint_macro name="front_axle_roll_joint" parent="front_pivot_link" child="front_dummy_link" xyz="0 0 ${body_to_axle/2}" axis="1 0 0"/>
+<xacro:dummy_link_macro name="front_dummy_link" xyz="0 0 0"/>
+<xacro:fixed_joint_macro name="front_axle_fixed_joint" parent="front_dummy_link" child="front_axle" xyz="0 0 -0.051"/>
+
+
+
+<xacro:axle_macro name="front_axle" xyz="0 0 0"/>
+
+<xacro:fixed_joint_macro name="winch_fixed_joint" parent="front_axle" child="winch" xyz="0.024 0 0.121"/>
+<xacro:part_macro name="winch" model="big_idea_winch.STL" mass="2"/>
+
+<xacro:joint_wheel_macro xyz="0  0.275 0" name="joint_wheel_0_0" parent="front_axle" child="wheel_0_0"/>
+<xacro:joint_wheel_macro xyz="0  -0.275 0" name="joint_wheel_0_1" parent="front_axle" child="wheel_0_1"/>
+<xacro:wheel_macro name="wheel_0_0" model="big_idea_wheel.STL"/>
+<xacro:wheel_macro name="wheel_0_1" model="big_idea_wheel.STL"/>
+
+<xacro:sliding_joint_macro name="pivot_joint_1_1" parent="body_1" child="body_2" xyz="${-body_x} 0 0"/>
+
+<xacro:body_macro name="body_2" xyz="0 0 0"/>
+
+<xacro:pivot_joint_macro name="rear_axle_yaw_joint" parent="body_2" child="rear_pivot_link" xyz="-${body_x/4} 0 ${body_to_axle/2}" axis="0 0 1"/>
+<xacro:axle_pivot_link_macro name="rear_pivot_link" xyz="0 0 0"/>
+<xacro:pivot_joint_macro name="rear_axle_roll_joint" parent="rear_pivot_link" child="rear_dummy_link" xyz="0 0 ${body_to_axle/2}" axis="1 0 0"/>
+<xacro:dummy_link_macro name="rear_dummy_link" xyz="0 0 0"/>
+<xacro:fixed_joint_macro name="rear_axle_fixed_joint" parent="rear_dummy_link" child="rear_axle" xyz="0 0 -0.051"/>
+
+
+<xacro:axle_macro name="rear_axle" xyz="0 0 0"/>
+
+
+
+
+<xacro:fixed_joint_macro name="vslot_fixed_joint" parent="rear_axle" child="vslot" xyz="-0.077 0 0.075"/>
+<xacro:part_macro name="vslot" model="big_idea_slot.STL" mass="1"/>
+
+
+<xacro:joint_wheel_macro xyz="0  0.275 0" name="joint_wheel_1_0" parent="rear_axle" child="wheel_1_0"/>
+<xacro:joint_wheel_macro xyz="0  -0.275 0" name="joint_wheel_1_1" parent="rear_axle" child="wheel_1_1"/>
+<xacro:wheel_macro name="wheel_1_0" model="big_idea_wheel.STL"/>
+<xacro:wheel_macro name="wheel_1_1" model="big_idea_wheel.STL"/>
+
+
+<!--check_urdf <(xacro inorder big_idea_winch.urdf.xacro) put two dashes before inorder-->
+
+<gazebo>
+  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+   <robotNamespace>/winch</robotNamespace>
+   <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+   <legacyModeNS>true</legacyModeNS>
+  </plugin>
+</gazebo>
+
+
+</robot>
