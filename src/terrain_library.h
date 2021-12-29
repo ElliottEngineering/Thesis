@@ -5,7 +5,7 @@
 //double coeffYawResistanceTorque = 0.001;
 //double coeffLatTerrainResistanceForce = 0.1;
 
-const int notN = 6;
+const int notN = 64;
 
 
 double max(double A, double B);

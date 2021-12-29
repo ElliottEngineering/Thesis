@@ -562,7 +562,7 @@ public:
 		heaveHo = 0;
 		leftRight = -leftRight;
 	}
-	
+	//ROS_INFO_STREAM(heaveHo);
 
   }
 
@@ -585,7 +585,7 @@ int main(int argc, char **argv){
 
 
 	ros::Publisher pub_motorSetSpeed = node_handle.advertise<std_msgs::Float32MultiArray>("/motorSetSpeed", 5);
-	ros::Publisher pub_prismaticSetPosition = node_handle.advertise<std_msgs::Float32MultiArray>("/prismaticSetPosition", 5);
+	ros::Publisher pub_prismaticSetForce = node_handle.advertise<std_msgs::Float32MultiArray>("/prismaticSetForce", 5);
 
 
 	int waypointNumber = 1;
@@ -607,7 +607,7 @@ int main(int argc, char **argv){
 	while(ros::ok()){
 
 		float motorSetSpeed[notN][2][2];
-		float pristmaticSetPosition[notN-1];
+		float prismaticSetForce[notN-1];
 		static float axleIntegral[notN][2];
 		static float oldAxleError[notN][2];
 
@@ -617,8 +617,8 @@ int main(int argc, char **argv){
 			std_msgs::Float32MultiArray msg_wheelSpeed;
 			msg_wheelSpeed.data.resize(notN*2*2);
 			
-			std_msgs::Float32MultiArray msg_prismaticSetPosition;
-			msg_prismaticSetPosition.data.resize(notN-1);
+			std_msgs::Float32MultiArray msg_prismaticSetForce;
+			msg_prismaticSetForce.data.resize(notN-1);
 
 			static int count = 0;
 			count++;
@@ -1087,46 +1087,46 @@ int main(int argc, char **argv){
 					
 					if(i % 2 == 0){	
 						if(heaveHo_L < 1){ //ahead segment anchoring
-							pristmaticSetPosition[i] = connectorForce[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
+							prismaticSetForce[i] = connectorForce[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
 							if(fabs(v1.getBodyLonRate(i)) > speedLimit){connectorForce[i] = constrain(connectorForce[i]*0.95,20,5000);}
 							else{connectorForce[i] = constrain(connectorForce[i]*1.05,20,5000);}
 						}else if(heaveHo_L < 1.25){
-							pristmaticSetPosition[i] = 0;							
+							prismaticSetForce[i] = 0;							
 						}else if(heaveHo_L < 2.25){ //ahead segment moving forward
-							pristmaticSetPosition[i] = -connectorForce[i]; //constrain(fabs(connectorForceP*v1.getBodyLonRate(i+1))-1,-1,0);
+							prismaticSetForce[i] = -connectorForce[i]; //constrain(fabs(connectorForceP*v1.getBodyLonRate(i+1))-1,-1,0);
 							if(fabs(v1.getBodyLonRate(i+1)) > speedLimit){connectorForce[i] = constrain(connectorForce[i]*0.95,20,5000);}
 							else{connectorForce[i] = constrain(connectorForce[i]*1.05,20,5000);}
 						}else{
-							pristmaticSetPosition[i] = 0;							
+							prismaticSetForce[i] = 0;							
 						}
 						
 						
 					}else{
 						if(heaveHo_L < 1){ //ahead segment moving forward
-							pristmaticSetPosition[i] = -connectorForce[i];//constrain(fabs(connectorForceP*v1.getBodyLonRate(i+1))-1,0,1);
+							prismaticSetForce[i] = -connectorForce[i];//constrain(fabs(connectorForceP*v1.getBodyLonRate(i+1))-1,0,1);
 							if(fabs(v1.getBodyLonRate(i+1)) > speedLimit){connectorForce[i] = constrain(connectorForce[i]*0.95,20,5000);}
 							else{connectorForce[i] = constrain(connectorForce[i]*1.05,20,5000);}
 						}else if(heaveHo_L < 1.25){
-							pristmaticSetPosition[i] = 0;
+							prismaticSetForce[i] = 0;
 							
 						}else if(heaveHo_L < 2.25){ //ahead segment anchoring
-							pristmaticSetPosition[i] = connectorForce[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),-1,0);
+							prismaticSetForce[i] = connectorForce[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),-1,0);
 							if(fabs(v1.getBodyLonRate(i)) > speedLimit){connectorForce[i] = constrain(connectorForce[i]*0.95,20,5000);}
 							else{connectorForce[i] = constrain(connectorForce[i]*1.05,20,5000);}
 						}else{
-							pristmaticSetPosition[i] = 0;
+							prismaticSetForce[i] = 0;
 							
 						}
 						
 					}			
 						
 					//connectorForce[i] = connectorForce[i] + 1 - fabs(v1.getBodyLonRate(i)) - fabs(v1.getBodyLonRate(i+1));
-					msg_prismaticSetPosition.data[i] = pristmaticSetPosition[i];
+					msg_prismaticSetForce.data[i] = prismaticSetForce[i];
 				}
 				
 				
 				pub_motorSetSpeed.publish(msg_wheelSpeed); //publish the motor setpoints
-				pub_prismaticSetPosition.publish(msg_prismaticSetPosition); //publish the prismatic joint set position
+				pub_prismaticSetForce.publish(msg_prismaticSetForce); //publish the prismatic joint set position
 				
 			}
 			else if (v1.getDriveType().compare("inch2") == 0) {
@@ -1231,68 +1231,69 @@ int main(int argc, char **argv){
 				float lowSpeedLimit = -0.01;
 				static float connectorForce1[notN-1];
 				static float connectorForce2[notN-1];
-				//ROS_INFO_STREAM(v1.getBodyLonRate(0) << ", " << pristmaticSetPosition[0] << ", " << v1.getBodyLonRate(1) << ", " << pristmaticSetPosition[1] << ", " << v1.getBodyLonRate(2) << ", " << pristmaticSetPosition[2] << ", " << v1.getBodyLonRate(3) << ", " << pristmaticSetPosition[3] << ", " << v1.getBodyLonRate(4) << ", " << pristmaticSetPosition[4]  << ", " << v1.getBodyLonRate(5));
+				//ROS_INFO_STREAM(v1.getBodyLonRate(0) << ", " << prismaticSetForce[0] << ", " << v1.getBodyLonRate(1) << ", " << prismaticSetForce[1] << ", " << v1.getBodyLonRate(2) << ", " << prismaticSetForce[2] << ", " << v1.getBodyLonRate(3) << ", " << prismaticSetForce[3] << ", " << v1.getBodyLonRate(4) << ", " << prismaticSetForce[4]  << ", " << v1.getBodyLonRate(5));
 				for(int i=0; i<notN-1; ++i){
-					//ROS_INFO_STREAM(pristmaticSetPosition[i]);
+					//ROS_INFO_STREAM(prismaticSetForce[i]);
 						
 					if(i % 3 == 0){//every third connector (would include first)
 						if(phase == 0){
-							pristmaticSetPosition[i] = -connectorForce1[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
+							prismaticSetForce[i] = -connectorForce1[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
 							if(v1.getBodyLonRate(i+1) < speedLimit){connectorForce1[i] = constrain(connectorForce1[i]*0.95,20,5000);}
 							else if(v1.getBodyLonRate(i+1) > lowSpeedLimit){connectorForce1[i] = constrain(connectorForce1[i]*1.05,20,5000);}
 						}else if(phase == 2){
-							pristmaticSetPosition[i] = connectorForce2[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
+							prismaticSetForce[i] = connectorForce2[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
 							if(v1.getBodyLonRate(i) < speedLimit){connectorForce2[i] = constrain(connectorForce2[i]*0.95,20,5000);}
 							else if(v1.getBodyLonRate(i) > lowSpeedLimit){connectorForce2[i] = constrain(connectorForce2[i]*1.05,20,5000);}
 						} else{
-							pristmaticSetPosition[i] = 0;
+							prismaticSetForce[i] = 0;
 						}						
 					
 					}else if(i % 3 == 1){ //this is the last connector
 						if(phase == 2){
-							pristmaticSetPosition[i] = -connectorForce1[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
+							prismaticSetForce[i] = -connectorForce1[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
 							if(v1.getBodyLonRate(i+1) < speedLimit){connectorForce1[i] = constrain(connectorForce1[i]*0.95,20,5000);}
 							else if(v1.getBodyLonRate(i+1) > lowSpeedLimit){connectorForce1[i] = constrain(connectorForce1[i]*1.05,20,5000);}
 						}else if(phase == 4){
-							pristmaticSetPosition[i] = connectorForce2[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
+							prismaticSetForce[i] = connectorForce2[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
 							if(v1.getBodyLonRate(i) < speedLimit){connectorForce2[i] = constrain(connectorForce2[i]*0.95,20,5000);}
 							else if(v1.getBodyLonRate(i) > lowSpeedLimit){connectorForce2[i] = constrain(connectorForce2[i]*1.05,20,5000);}
 						} else{
-							pristmaticSetPosition[i] = 0;
+							prismaticSetForce[i] = 0;
 						}												
 						
 					}else if(i % 3 == 2){ 
 						if(phase == 0){
-							pristmaticSetPosition[i] = connectorForce1[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
+							prismaticSetForce[i] = connectorForce1[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
 							if(v1.getBodyLonRate(i) < speedLimit){connectorForce1[i] = constrain(connectorForce1[i]*0.95,20,5000);}
 							else if(v1.getBodyLonRate(i) > lowSpeedLimit){connectorForce1[i] = constrain(connectorForce1[i]*1.05,20,5000);}
 						}else if(phase == 4){
-							pristmaticSetPosition[i] = -connectorForce2[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
+							prismaticSetForce[i] = -connectorForce2[i];//constrain(1-fabs(connectorForceP*v1.getBodyLonRate(i)),0,1);
 							if(v1.getBodyLonRate(i+1) < speedLimit){connectorForce2[i] = constrain(connectorForce2[i]*0.95,20,5000);}
 							else if(v1.getBodyLonRate(i+1) > lowSpeedLimit){connectorForce2[i] = constrain(connectorForce2[i]*1.05,20,5000);}
 						} else{
-							pristmaticSetPosition[i] = 0;
+							prismaticSetForce[i] = 0;
 						}	
 										
 					}					
 						
 					//connectorForce[i] = connectorForce[i] + 1 - fabs(v1.getBodyLonRate(i)) - fabs(v1.getBodyLonRate(i+1));
-					msg_prismaticSetPosition.data[i] = pristmaticSetPosition[i];
+					msg_prismaticSetForce.data[i] = prismaticSetForce[i];
 				}
 				
 				
 				pub_motorSetSpeed.publish(msg_wheelSpeed); //publish the motor setpoints
-				pub_prismaticSetPosition.publish(msg_prismaticSetPosition); //publish the prismatic joint set position
+				pub_prismaticSetForce.publish(msg_prismaticSetForce); //publish the prismatic joint set position
 				
 			}
 			else if (v1.getDriveType().compare("two-to-one") == 0) {
 							
-				// this case should work for any numnber of segments
+				// this case should work for any number of segments
 				float V = 0; //rad/s
 				float upperLimit = noLoadSpeed;
 				float lowerLimit = -noLoadSpeed;
 				float P3 = 10;
-				float driveSpeed = 0.6 / wheelRadius;
+				float linearDriveSpeed = 0.6;
+				float driveSpeed = linearDriveSpeed / wheelRadius;
 				float idleSpeed = 0.0 / wheelRadius;
 				float anchorSpeed = 0.05 / wheelRadius;
 				float heaveHo_L = v1.get_heaveHo();	
@@ -1380,63 +1381,76 @@ int main(int argc, char **argv){
 					}
 				}
 				
-				float connectorForceP = 5;
-				float speedLimit = -0.05;
-				float lowSpeedLimit = -0.01;
-				static float connectorForce1[notN-1];
-				static float connectorForce2[notN-1];
-				ROS_INFO_STREAM(v1.getBodyLonRate(0) << ", " << pristmaticSetPosition[0] << ", " << v1.getBodyLonRate(1) << ", " << pristmaticSetPosition[1] << ", " << v1.getBodyLonRate(2) << ", " << pristmaticSetPosition[2] << ", " << v1.getBodyLonRate(3) << ", " << pristmaticSetPosition[3] << ", " << v1.getBodyLonRate(4) << ", " << pristmaticSetPosition[4]  << ", " << v1.getBodyLonRate(5));
+				float connectorForceP1 = 100;
+				float connectorForceP2 = 300;
+
+				//ROS_INFO_STREAM(v1.getBodyLonRate(0) << ", " << prismaticSetForce[0] << ", " << v1.getBodyLonRate(1) << ", " << prismaticSetForce[1] << ", " << v1.getBodyLonRate(2) << ", " << prismaticSetForce[2] << ", " << v1.getBodyLonRate(3) << ", " << prismaticSetForce[3] << ", " << v1.getBodyLonRate(4) << ", " << prismaticSetForce[4]  << ", " << v1.getBodyLonRate(5));
+				ROS_INFO_STREAM(v1.getBodyLonRate(0) << ", " << prismaticSetForce[0] << ", " << v1.getBodyLonRate(1) << ", " << prismaticSetForce[1] << ", " << v1.getBodyLonRate(2));
+	
 				for(int i=0; i<notN-1; ++i){
-					//ROS_INFO_STREAM(pristmaticSetPosition[i]);
-						
+					//ROS_INFO_STREAM(prismaticSetForce[i]);
+					
+					float M = 1.0;
+					if((i == 0 || i == notN-2) && notN >= 4){
+						M = 1.5;
+					}else{
+						M = 1;
+					}
+					
 					if(i % 3 == 0){//every third connector (would include first)
-						if(phase == 0){
-							pristmaticSetPosition[i] = -connectorForce1[i];
-							if(v1.getBodyLonRate(i+1) < speedLimit){connectorForce1[i] = constrain(connectorForce1[i]*0.95,20,1000);}
-							else if(v1.getBodyLonRate(i+1) > lowSpeedLimit){connectorForce1[i] = constrain(connectorForce1[i]*1.05,20,1000);}
-						}else if(phase == 2){
-							pristmaticSetPosition[i] = connectorForce2[i];
-							if(v1.getBodyLonRate(i) < speedLimit){connectorForce2[i] = constrain(connectorForce2[i]*0.95,20,1000);}
-							else if(v1.getBodyLonRate(i) > lowSpeedLimit){connectorForce2[i] = constrain(connectorForce2[i]*1.05,20,1000);}
-						} else{
-							pristmaticSetPosition[i] = 0;
+						if(phase == 0){ 
+							float error1 = 0 - v1.getBodyLonRate(i+1);	//stationary segment
+							float error2 = linearDriveSpeed - v1.getBodyLonRate(i); //mobile segment
+							prismaticSetForce[i] = -connectorForceP1*error1 - connectorForceP2*error2*M;
+							
+						}else if(phase == 2){							
+							float error1 = 0 - v1.getBodyLonRate(i);	//stationary segment
+							float error2 = linearDriveSpeed - v1.getBodyLonRate(i+1); //mobile segment
+							prismaticSetForce[i] = connectorForceP1*error1 + connectorForceP2*error2;
+							
+						}else{
+							prismaticSetForce[i] = 0;
 						}						
 					
-					}else if(i % 3 == 1){ //this is the last connector
-						if(phase == 2){
-							pristmaticSetPosition[i] = -connectorForce1[i];
-							if(v1.getBodyLonRate(i+1) < speedLimit){connectorForce1[i] = constrain(connectorForce1[i]*0.95,20,1000);}
-							else if(v1.getBodyLonRate(i+1) > lowSpeedLimit){connectorForce1[i] = constrain(connectorForce1[i]*1.05,20,1000);}
-						}else if(phase == 4){
-							pristmaticSetPosition[i] = connectorForce2[i];
-							if(v1.getBodyLonRate(i) < speedLimit){connectorForce2[i] = constrain(connectorForce2[i]*0.95,20,1000);}
-							else if(v1.getBodyLonRate(i) > lowSpeedLimit){connectorForce2[i] = constrain(connectorForce2[i]*1.05,20,1000);}
+					}else if(i % 3 == 1){
+						if(phase == 2){			
+							float error1 = 0 - v1.getBodyLonRate(i+1);	//stationary segment
+							float error2 = linearDriveSpeed - v1.getBodyLonRate(i); //mobile segment						
+							prismaticSetForce[i] = - connectorForceP1*error1 - connectorForceP2*error2;
+						
+						}else if(phase == 4){			
+							float error1 = 0 - v1.getBodyLonRate(i);	//stationary segment
+							float error2 = linearDriveSpeed - v1.getBodyLonRate(i+1); //mobile segment						
+							prismaticSetForce[i] = connectorForceP1*error1 + connectorForceP2*error2*M;
+						
 						} else{
-							pristmaticSetPosition[i] = 0;
+							prismaticSetForce[i] = 0;
 						}												
 						
 					}else if(i % 3 == 2){ 
-						if(phase == 0){
-							pristmaticSetPosition[i] = connectorForce1[i];
-							if(v1.getBodyLonRate(i) < speedLimit){connectorForce1[i] = constrain(connectorForce1[i]*0.95,20,1000);}
-							else if(v1.getBodyLonRate(i) > lowSpeedLimit){connectorForce1[i] = constrain(connectorForce1[i]*1.05,20,1000);}
-						}else if(phase == 4){
-							pristmaticSetPosition[i] = -connectorForce2[i];
-							if(v1.getBodyLonRate(i+1) < speedLimit){connectorForce2[i] = constrain(connectorForce2[i]*0.95,20,1000);}
-							else if(v1.getBodyLonRate(i+1) > lowSpeedLimit){connectorForce2[i] = constrain(connectorForce2[i]*1.05,20,1000);}
+						if(phase == 4){		
+							float error1 = 0 - v1.getBodyLonRate(i+1);	//stationary segment
+							float error2 = linearDriveSpeed - v1.getBodyLonRate(i); //mobile segment
+							prismaticSetForce[i] = - connectorForceP1*error1 - connectorForceP2*error2;
+						
+						}else if(phase == 0){							
+							float error1 = 0 - v1.getBodyLonRate(i);	//stationary segment
+							float error2 = linearDriveSpeed - v1.getBodyLonRate(i+1); //mobile segment
+							prismaticSetForce[i] = connectorForceP1*error1 + connectorForceP2*error2*M;
+						
 						} else{
-							pristmaticSetPosition[i] = 0;
+							prismaticSetForce[i] = 0;
 						}	
 										
 					}					
 						
 					//connectorForce[i] = connectorForce[i] + 1 - fabs(v1.getBodyLonRate(i)) - fabs(v1.getBodyLonRate(i+1));
-					msg_prismaticSetPosition.data[i] = pristmaticSetPosition[i];
+					msg_prismaticSetForce.data[i] = constrain(prismaticSetForce[i],-1000,1000);
 				}
 				
 				
 				pub_motorSetSpeed.publish(msg_wheelSpeed); //publish the motor setpoints
-				pub_prismaticSetPosition.publish(msg_prismaticSetPosition); //publish the prismatic joint set position
+				pub_prismaticSetForce.publish(msg_prismaticSetForce); //publish the prismatic joint set position
 				
 			}
 		}		

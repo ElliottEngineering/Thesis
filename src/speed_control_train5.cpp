@@ -43,7 +43,7 @@ private:
 	float wheelAngularPosition[notN][2][2];
 
 	float prismaticJointPosition[notN - 1];
-	float prismaticSetPosition[notN - 1];
+	float prismaticSetForce[notN - 1];
 	float prismaticJointSpeed[notN - 1];
 	float prismaticSetSpeed[notN - 1];
 
@@ -53,6 +53,7 @@ private:
 	ros::Subscriber sub1;
 	ros::Subscriber sub2;
 	ros::Subscriber sub3;
+	ros::Subscriber sub4;
 
 
 
@@ -72,15 +73,16 @@ public:
 		//subscribers
 		sub1 = nh_.subscribe("/dd_robot/joint_states", 1, &variables::joint_states_Callback, this, ros::TransportHints().tcpNoDelay());
 		sub2 = nh_.subscribe("/motorSetSpeed", 1, &variables::motorSetSpeed_Callback, this, ros::TransportHints().tcpNoDelay());
-		sub3 = nh_.subscribe("/prismaticSetPosition", 1, &variables::prismaticSetPosition_Callback, this, ros::TransportHints().tcpNoDelay());
+		sub3 = nh_.subscribe("/prismaticSetForce", 1, &variables::prismaticSetForce_Callback, this, ros::TransportHints().tcpNoDelay());
+		sub4 = nh_.subscribe("/prismaticSetSpeed", 1, &variables::prismaticSetForce_Callback, this, ros::TransportHints().tcpNoDelay());
 
 		//timer callbacks
 
 		timer2 = nh_.createTimer(ros::Duration(1 / speedControllerLoopRate), &variables::speedControlCallback, this);
 	}
   
-	float getPrismaticSetPosition(int i){
-		return prismaticSetPosition[i];
+	float getPrismaticSetForce(int i){
+		return prismaticSetForce[i];
 	}
   
   float getPrismaticSetSpeed(int i){
@@ -122,9 +124,9 @@ public:
     motorSetPoint[i][j][k] = setpoint;
   }
   
-	void prismaticSetPosition_Callback(const std_msgs::Float32MultiArray::ConstPtr& msg){
+	void prismaticSetForce_Callback(const std_msgs::Float32MultiArray::ConstPtr& msg){
 		for(int i=0; i<notN; i++){
-			prismaticSetPosition[i] = msg->data[i];
+			prismaticSetForce[i] = msg->data[i];
 			prismaticSetSpeed[i] = msg->data[i]; //same value to both, change later
 		}
 	}
@@ -214,7 +216,7 @@ int main(int argc, char **argv){
   variables v1(&node_handle);
 
   ros::Publisher pub_motorSetPoint = node_handle.advertise<std_msgs::Float32MultiArray>("/motorSetPoint", 5);
-  ros::Publisher pub_prismaticSetPoint = node_handle.advertise<std_msgs::Float32MultiArray>("/prismaticSetPoint", 5);
+  ros::Publisher pub_prismaticSetForce = node_handle.advertise<std_msgs::Float32MultiArray>("/prismaticSetForce", 5);
 
 
   ROS_INFO_STREAM("#########################################################");
@@ -249,8 +251,8 @@ int main(int argc, char **argv){
 		std_msgs::Float32MultiArray msg;
 		msg.data.resize(notN*2*2);
 
-		std_msgs::Float32MultiArray msg_prismaticSetPoint;
-		msg_prismaticSetPoint.data.resize(notN - 1);
+		std_msgs::Float32MultiArray msg_prismaticSetForce;
+		msg_prismaticSetForce.data.resize(notN - 1);
 
 
 		static float speedErrorIntegral[notN][2][2];
@@ -324,8 +326,8 @@ int main(int argc, char **argv){
 	  
 	  //work through the prismatic joints
 	  for(int i=0; i<notN-1; ++i){
-		  msg_prismaticSetPoint.data[i] = v1.getPrismaticSetPosition(i);
-		  //msg_prismaticSetPoint.data[i] = constrain(2000*(v1.getPrismaticSetSpeed(i)  - v1.getPrismaticJointSpeed(i)),-1000,1000);
+		  msg_prismaticSetForce.data[i] = v1.getPrismaticSetForce(i);
+		  //msg_prismaticSetForce.data[i] = constrain(2000*(v1.getPrismaticSetSpeed(i)  - v1.getPrismaticJointSpeed(i)),-1000,1000);
 		  
 	  }
 	  
@@ -336,7 +338,7 @@ int main(int argc, char **argv){
 		}*/
 	  
       pub_motorSetPoint.publish(msg); //publish the motor setpoints
-	  pub_prismaticSetPoint.publish(msg_prismaticSetPoint);
+	  pub_prismaticSetForce.publish(msg_prismaticSetForce);
     }
     ros::spinOnce();
   }
